@@ -3,7 +3,8 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -pthread
 
 # Source files
-SRCS = ui.cpp scan.cpp attack.cpp
+SRCS = ui.cpp scan.cpp attack.cpp attack1.cpp
+
 
 # Object files (derived from source files)
 OBJS = $(SRCS:.cpp=.o)

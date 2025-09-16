@@ -69,8 +69,12 @@ extern std::map<std::string, DeviceInfo> device_database;
 extern Interface active_interface;
 extern const std::string DB_FILENAME;
 extern std::map<std::string, std::string> oui_map;
+// --- UNUSED CODE START ---
+// The following two maps are defined in attack.cpp but are not currently
+// used by any function. Local variables are used instead.
 extern std::map<std::string, std::thread> active_attack_threads;
 extern std::map<std::string, std::atomic<bool>> attack_signals;
+// --- UNUSED CODE END ---
 
 
 // --- Function Prototypes ---
@@ -83,8 +87,9 @@ void load_database();
 void save_database();
 void display_known_devices();
 
-// From attack.cpp
+// From attack.cpp and attack1.cpp
 void start_lan_isolation_attack();
+void start_mitm_attack(); // <-- Fix applied here
 
 // From ui.cpp
 void print_header();

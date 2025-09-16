@@ -28,7 +28,8 @@ void main_menu() {
     std::cout << "1. Scan Network" << std::endl;
     std::cout << "2. View Known Devices" << std::endl;
     std::cout << "3. Start LAN Isolation Attack" << std::endl;
-    std::cout << "4. Exit" << std::endl;
+    std::cout << "4. Start MITM Attack (Cut off)" << std::endl; 
+    std::cout << "5. Exit" << std::endl;
     std::cout << "----------------------------------------------------" << std::endl;
     std::cout << "Enter your choice: ";
 }
@@ -105,6 +106,9 @@ int main() {
                 start_lan_isolation_attack();
                 break;
             case 4:
+                start_mitm_attack();
+                break;
+            case 5:
                 // save_database(); // Uncomment to save data on exit
                 std::cout << "Exiting." << std::endl;
                 return 0;

@@ -258,3 +258,59 @@ void start_mitm_attack() {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
 }
+
+// --- NEW FUNCTION for GUI ---
+void run_mitm_attack_gui(const std::vector<std::string>& target_ips, const std::string& gateway_ip, std::atomic<bool>* stop_signal) {
+    // 1. Resolve Gateway Host object
+    Host gateway_host;
+    gateway_host.ip = gateway_ip;
+    
+    // Attempt to find Gateway MAC in existing hosts list first
+    bool gateway_found = false;
+    for (const auto& host : hosts) {
+        if (host.ip == gateway_ip) {
+            gateway_host.mac = host.mac;
+            gateway_found = true;
+            break;
+        }
+    }
+    
+    // If not in cache, we should technically probe it (like in CLI), 
+    // but for the GUI we assume the scan caught it or we handle the error.
+    
+    // 2. Resolve Target Hosts from Strings
+    std::vector<Host> targets_to_attack;
+    for(const auto& t_ip : target_ips) {
+        for(const auto& h : hosts) {
+            if(h.ip == t_ip) {
+                targets_to_attack.push_back(h);
+                break;
+            }
+        }
+    }
+
+    if (targets_to_attack.empty() || gateway_host.mac.empty()) {
+        return; 
+    }
+
+    // 3. Launch Attack Threads
+    std::vector<std::thread> attack_threads;
+    for(const auto& target : targets_to_attack) {
+        attack_threads.emplace_back(mitm_attack, target, gateway_host, stop_signal);
+    }
+
+    // 4. Wait for stop signal (Blocking implementation for the worker thread)
+    while(stop_signal->load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    // 5. Join Threads
+    for (auto& th : attack_threads) {
+        if (th.joinable()) th.join();
+    }
+
+    // 6. Recovery
+    for(const auto& target : targets_to_attack) {
+        recover_mitm(target, gateway_host);
+    }
+}

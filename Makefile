@@ -1,31 +1,42 @@
-# Compiler and flags
+# Compiler
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -pthread
 
-# Source files
-SRCS = ui.cpp scan.cpp attack.cpp attack1.cpp
+# Flags: Standard C++17, Warnings, Thread support, Position Independent Code
+# We use pkg-config to get the correct Include paths for Qt5
+CXXFLAGS = -std=c++17 -Wall -pthread -fPIC $(shell pkg-config --cflags Qt5Widgets)
 
+# Linker Flags: Get libraries for Qt5 Widgets
+LDFLAGS = $(shell pkg-config --libs Qt5Widgets)
 
-# Object files (derived from source files)
+# Source files (Excluding the old ui.cpp)
+SRCS = scan.cpp attack.cpp attack1.cpp gui_main.cpp
+
+# Object files
 OBJS = $(SRCS:.cpp=.o)
 
-# Target executable name
-TARGET = netcut
+# Target executable
+TARGET = netcut-gui
 
-# Default rule: build the executable
+# Default rule
 all: $(TARGET)
 
-# Rule to link the object files into the final executable
+# Link
 $(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
-# Generic rule to compile .cpp files into .o object files
+# Compile C++ source to object files
+# Note: gui_main.cpp depends on gui_main.moc
 %.o: %.cpp common.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Rule to clean up build files
-clean:
-	rm -f $(OBJS) $(TARGET)
+# Generate Meta-Object Code for Qt
+gui_main.moc: gui_main.cpp
+	moc gui_main.cpp -o gui_main.moc
 
-# Phony targets
+# Explicit dependency for gui_main.o to ensure moc is generated first
+gui_main.o: gui_main.moc
+
+clean:
+	rm -f $(OBJS) $(TARGET) gui_main.moc
+
 .PHONY: all clean

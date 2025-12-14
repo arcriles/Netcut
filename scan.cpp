@@ -1,12 +1,36 @@
 #include "common.hpp"
 
 // --- Global Variable Definitions ---
-// These variables are defined here and declared as 'extern' in common.hpp
 std::vector<Host> hosts;
 std::map<std::string, DeviceInfo> device_database;
 Interface active_interface;
 const std::string DB_FILENAME = "netcut_db.csv";
 std::map<std::string, std::string> oui_map;
+
+// --- Helper Functions (Moved from old ui.cpp) ---
+void string_mac_to_bytes(unsigned char* byte_array, const std::string& mac_str) {
+    sscanf(mac_str.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+           &byte_array[0], &byte_array[1], &byte_array[2],
+           &byte_array[3], &byte_array[4], &byte_array[5]);
+}
+
+std::string bytes_mac_to_string(const unsigned char* byte_array) {
+    char mac_str[18];
+    sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x",
+            byte_array[0], byte_array[1], byte_array[2],
+            byte_array[3], byte_array[4], byte_array[5]);
+    return std::string(mac_str);
+}
+
+// Stub for CLI header (needed by attack.cpp)
+void print_header() {
+    // No-op for GUI
+}
+
+// Stub for CLI results (needed by attack.cpp)
+void display_scan_results() {
+    // No-op for GUI
+}
 
 // --- Utility function specific to scanning ---
 std::string get_vendor(std::string mac) {
@@ -156,4 +180,18 @@ void display_known_devices() {
     std::cout << "------------------------------------------------------------------" << std::endl;
     std::cout << "\nPress Enter to continue...";
     std::cin.get();
+}
+
+// --- NEW FUNCTION for GUI ---
+std::string resolve_hostname(const std::string& ip) {
+    struct sockaddr_in sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sin_family = AF_INET;
+    inet_pton(AF_INET, ip.c_str(), &sa.sin_addr);
+    
+    char node[NI_MAXHOST];
+    if (getnameinfo((struct sockaddr*)&sa, sizeof(sa), node, sizeof(node), NULL, 0, 0) == 0) {
+        return std::string(node);
+    }
+    return ""; 
 }

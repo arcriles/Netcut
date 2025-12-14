@@ -29,6 +29,7 @@
 #include <arpa/inet.h>
 #include <linux/if_packet.h>
 #include <linux/if_arp.h>
+#include <netdb.h> // Added for getnameinfo
 
 // --- ANSI Color Codes ---
 #define RESET   "\033[0m"
@@ -86,10 +87,16 @@ void load_oui_from_manuf();
 void load_database();
 void save_database();
 void display_known_devices();
+std::string resolve_hostname(const std::string& ip); // NEW: For GUI
 
 // From attack.cpp and attack1.cpp
 void start_lan_isolation_attack();
-void start_mitm_attack(); // <-- Fix applied here
+void start_mitm_attack(); 
+void mitm_attack(const Host target, const Host gateway, std::atomic<bool>* signal);
+void recover_mitm(const Host& target, const Host& gateway);
+
+// NEW: GUI wrapper for attack logic
+void run_mitm_attack_gui(const std::vector<std::string>& target_ips, const std::string& gateway_ip, std::atomic<bool>* stop_signal);
 
 // From ui.cpp
 void print_header();
